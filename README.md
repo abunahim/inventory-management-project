@@ -6,10 +6,10 @@ Built an inventory management system using Java Spring Boot while implementing D
 
 ## Tech Stack
 
-Backend: Java Spring Boot
-Database: MySQL
-Containerization: Docker
-CI/CD: GitHub Actions
+- Backend: Java Spring Boot
+- Database: MySQL
+- Containerization: Docker
+- CI/CD: GitHub Actions
 
 ## Features (Planned)
 
@@ -20,10 +20,19 @@ CI/CD: GitHub Actions
 
 ## Project Phases
 
-Phase 1: Project Setup
-Phase 2: Spring Boot API
-Phase 3: Database Intergration
-Phase 4: Testing
-Phase 5: Docker
-Phase 6: CI/CD
-Phase 7: Deployment
+- Phase 1: Project Setup
+- Phase 2: Spring Boot API
+- Phase 3: Database Intergration
+- Phase 4: Testing
+- Phase 5: Docker
+- Phase 6: CI/CD
+- Phase 7: Deployment
+
+## Phase 1 - Project Setup
+
+Completed
+
+- Created project structure
+- Initialized Git repository
+- Created GitHub repository
+- Added README documentation
