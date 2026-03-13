@@ -1,0 +1,26 @@
+# Maven build folder
+target/
+
+# Logs
+*.logs
+
+# Environment variables
+.env
+
+# IDE folders
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules (future frontend)
+node_modules/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Java compiled classes
+*.class
