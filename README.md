@@ -36,3 +36,14 @@ Completed
 - Initialized Git repository
 - Created GitHub repository
 - Added README documentation
+
+## System Architecture
+
+The system follows a 3 Layer architecture.
+
+Client -> REST API -> Database
+
+Layers:
+- Controller
+- Service
+- Repository
