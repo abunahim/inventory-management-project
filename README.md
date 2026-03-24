@@ -38,7 +38,7 @@ App runs at: `http://localhost:8080`
 | 1 | Git setup + Spring Boot skeleton | ✅ Done |
 | 2 | REST API + CRUD + Validation | ✅ Done |
 | 3 | DTO Layer | ✅ Done |
-| 4 | Testing (JUnit) | 🔜 Next |
+| 4 | Testing (JUnit) | ✅ Done |
 | 5 | Docker | ⏳ Pending |
 | 6 | CI/CD with GitHub Actions | ⏳ Pending |
 | 7 | Cloud Deployment | ⏳ Pending |
@@ -50,3 +50,4 @@ App runs at: `http://localhost:8080`
 - **Phase 1** — Project initialized with Spring Boot. Git + GitHub configured.
 - **Phase 2** — Built Product CRUD REST API, input validation, exception handling and fixed transitive CVEs.
 - **Phase 3** — Added DTO layer, separating API contracts from database entities.
+- **Phase 4** — Added JUnit unit tests, repository tests and MockMvc integration tests.
