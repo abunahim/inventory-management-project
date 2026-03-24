@@ -39,7 +39,7 @@ App runs at: `http://localhost:8080`
 | 2 | REST API + CRUD + Validation | ✅ Done |
 | 3 | DTO Layer | ✅ Done |
 | 4 | Testing (JUnit) | ✅ Done |
-| 5 | Docker | ⏳ Pending |
+| 5 | Docker | ✅ Done |
 | 6 | CI/CD with GitHub Actions | ⏳ Pending |
 | 7 | Cloud Deployment | ⏳ Pending |
 | 8 | Monitoring | ⏳ Pending |
@@ -51,3 +51,4 @@ App runs at: `http://localhost:8080`
 - **Phase 2** — Built Product CRUD REST API, input validation, exception handling and fixed transitive CVEs.
 - **Phase 3** — Added DTO layer, separating API contracts from database entities.
 - **Phase 4** — Added JUnit unit tests, repository tests and MockMvc integration tests.
+- **Phase 5** — Containerized app and MySQL with Docker and docker-compose.
