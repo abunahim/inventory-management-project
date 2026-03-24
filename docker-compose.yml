@@ -1,0 +1,37 @@
+services:
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: inventory-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ./backend/inventory-management
+      dockerfile: Dockerfile
+    container_name: inventory-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
