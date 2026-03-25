@@ -24,3 +24,5 @@ node_modules/
 
 # Java compiled classes
 *.class
+
+k8s/secret.yml
