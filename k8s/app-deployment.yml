@@ -34,6 +34,8 @@ spec:
                 secretKeyRef:
                   name: inventory-secret
                   key: DB_PASSWORD
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
           readinessProbe:
             httpGet:
               path: /products
