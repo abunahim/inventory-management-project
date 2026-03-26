@@ -1,18 +1,19 @@
 services:
 
-  mysql-db:
-    image: mysql:8.0
-    container_name: inventory-mysql
+  postgres-db:
+    image: postgres:16
+    container_name: inventory-postgres
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3307:3306"
+      - "5432:5432"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,9 +30,10 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      mysql-db:
+      postgres-db:
         condition: service_healthy
 
 volumes:
-  mysql-data:
+  postgres-data:
