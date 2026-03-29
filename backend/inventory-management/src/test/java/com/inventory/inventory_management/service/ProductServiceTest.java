@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -48,7 +49,7 @@ class ProductServiceTest {
         requestDTO.setPrice(999.99);
         requestDTO.setQuantity(10);
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     @Test
@@ -140,7 +141,6 @@ class ProductServiceTest {
 
     @Test
     void deleteProduct_ShouldThrowException_WhenNotFound() {
-        when(valueOperations.get("product::99")).thenReturn(null);
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
