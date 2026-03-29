@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,12 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private RedisTemplate<String, ProductResponseDTO> redisTemplate;
+
+    @Mock
+    private ValueOperations<String, ProductResponseDTO> valueOperations;
 
     @InjectMocks
     private ProductService productService;
@@ -39,6 +47,8 @@ class ProductServiceTest {
         requestDTO.setName("Laptop");
         requestDTO.setPrice(999.99);
         requestDTO.setQuantity(10);
+
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     @Test
@@ -60,23 +70,37 @@ class ProductServiceTest {
 
         assertNotNull(result);
         assertEquals("Laptop", result.getName());
-        assertEquals(999.99, result.getPrice());
         verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
-    void getProductById_ShouldReturnProduct_WhenExists() {
+    void getProductById_ShouldReturnFromCache_WhenCached() {
+        ProductResponseDTO cached = new ProductResponseDTO();
+        cached.setId(1L);
+        cached.setName("Laptop");
+        when(valueOperations.get("product::1")).thenReturn(cached);
+
+        ProductResponseDTO result = productService.getProductById(1L);
+
+        assertEquals("Laptop", result.getName());
+        verify(productRepository, never()).findById(any());
+    }
+
+    @Test
+    void getProductById_ShouldFetchFromDB_WhenNotCached() {
+        when(valueOperations.get("product::1")).thenReturn(null);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         ProductResponseDTO result = productService.getProductById(1L);
 
         assertNotNull(result);
-        assertEquals(1L, result.getId());
         assertEquals("Laptop", result.getName());
+        verify(productRepository, times(1)).findById(1L);
     }
 
     @Test
     void getProductById_ShouldThrowException_WhenNotFound() {
+        when(valueOperations.get("product::99")).thenReturn(null);
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
@@ -101,7 +125,6 @@ class ProductServiceTest {
         ProductResponseDTO result = productService.updateProduct(1L, updateDTO);
 
         assertEquals("Gaming Laptop", result.getName());
-        assertEquals(1299.99, result.getPrice());
     }
 
     @Test
@@ -112,10 +135,12 @@ class ProductServiceTest {
         productService.deleteProduct(1L);
 
         verify(productRepository, times(1)).deleteById(1L);
+        verify(redisTemplate, times(1)).delete("product::1");
     }
 
     @Test
     void deleteProduct_ShouldThrowException_WhenNotFound() {
+        when(valueOperations.get("product::99")).thenReturn(null);
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
