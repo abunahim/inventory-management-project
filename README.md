@@ -3,7 +3,7 @@
 ![CI Pipeline](https://github.com/abunahim/inventory-management-project/actions/workflows/ci.yml/badge.svg)
 ![CD Pipeline](https://github.com/abunahim/inventory-management-project/actions/workflows/cd.yml/badge.svg)
 
-A RESTful inventory management system built with **Java Spring Boot**, developed phase-by-phase while learning DevOps practices.
+A full-stack inventory management system built with **Java Spring Boot** and **React**, developed phase-by-phase while learning DevOps practices.
 
 ---
 
@@ -12,8 +12,9 @@ A RESTful inventory management system built with **Java Spring Boot**, developed
 | Layer | Technology |
 |---|---|
 | Backend | Java 17, Spring Boot 3.5.x |
+| Frontend | React 18, Vite, Axios |
 | Database | PostgreSQL 16 |
-| Caching | Redis (coming soon) |
+| Caching | Redis 7.2 |
 | Build Tool | Maven |
 | Containerization | Docker, Docker Compose |
 | Orchestration | Kubernetes (kind) |
@@ -24,13 +25,14 @@ A RESTful inventory management system built with **Java Spring Boot**, developed
 
 ## 🏗️ Architecture
 ```
-                    Client (Postman / React)
+                    [ React Frontend ]
+                    (localhost:5173)
                            ↓
                     [ Spring Boot API ]
                     (2 K8s replicas)
-                           ↓
-                    [ PostgreSQL 16 ]
-                    (persistent storage)
+                         ↙   ↘
+              [ Redis Cache ]  [ PostgreSQL 16 ]
+              (cache reads)    (persistent storage)
 ```
 
 ---
@@ -41,6 +43,7 @@ A RESTful inventory management system built with **Java Spring Boot**, developed
 - Java 17+
 - Maven
 - Docker Desktop
+- Node.js 24+
 - kubectl
 
 ### Option 1 — Run with Docker Compose
@@ -55,7 +58,7 @@ cd inventory-management-project
 
 docker-compose up --build
 ```
-App runs at: `http://localhost:8080`
+Backend runs at: `http://localhost:8080`
 
 ### Option 2 — Run with Kubernetes
 ```bash
@@ -64,13 +67,22 @@ kubectl apply -f k8s/configmap.yml
 kubectl apply -f k8s/secret.yml
 kubectl apply -f k8s/postgres-deployment.yml
 kubectl apply -f k8s/postgres-service.yml
+kubectl apply -f k8s/redis-deployment.yml
+kubectl apply -f k8s/redis-service.yml
 kubectl apply -f k8s/app-deployment.yml
 kubectl apply -f k8s/app-service.yml
 
-# Port forward to access the app
 kubectl port-forward service/inventory-app-service 8081:8080 -n inventory
 ```
-App runs at: `http://localhost:8081`
+Backend runs at: `http://localhost:8081`
+
+### Option 3 — Run Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Frontend runs at: `http://localhost:5173`
 
 ---
 
@@ -80,7 +92,7 @@ App runs at: `http://localhost:8081`
 |---|---|---|
 | GET | `/products` | Get all products |
 | POST | `/products` | Create a product |
-| GET | `/products/{id}` | Get product by ID |
+| GET | `/products/{id}` | Get product by ID (cached) |
 | PUT | `/products/{id}` | Update product |
 | DELETE | `/products/{id}` | Delete product |
 
@@ -99,7 +111,7 @@ App runs at: `http://localhost:8081`
 
 | Trigger | Pipeline | What it does |
 |---|---|---|
-| Push to any branch | CI | Runs all 18 tests |
+| Push to any branch | CI | Runs all 19 tests |
 | Merge to `main` | CD | Builds and pushes Docker image to Docker Hub |
 
 ---
@@ -126,9 +138,9 @@ App runs at: `http://localhost:8081`
 | 6 | CI/CD with GitHub Actions | ✅ Done |
 | 7 | Kubernetes | ✅ Done |
 | 8 | PostgreSQL | ✅ Done |
-| 9 | Redis (Caching) | 🔜 Next |
-| 10 | React Frontend | ⏳ Pending |
-| 11 | JWT Security | ⏳ Pending |
+| 9 | Redis (Caching) | ✅ Done |
+| 10 | React Frontend | ✅ Done |
+| 11 | JWT Security | 🔜 Next |
 | 12 | AWS Deployment | ⏳ Pending |
 | 13 | Prometheus + Grafana | ⏳ Pending |
 
@@ -138,8 +150,10 @@ App runs at: `http://localhost:8081`
 - **Phase 1** — Project initialized with Spring Boot. Git + GitHub configured.
 - **Phase 2** — Built Product CRUD REST API, input validation, exception handling and fixed transitive CVEs.
 - **Phase 3** — Added DTO layer, separating API contracts from database entities.
-- **Phase 4** — Added JUnit unit tests, repository tests and MockMvc integration tests. 18/18 passing.
+- **Phase 4** — Added JUnit unit tests, repository tests and MockMvc integration tests. 19/19 passing.
 - **Phase 5** — Containerized app and PostgreSQL with Docker and docker-compose.
 - **Phase 6** — CI/CD pipelines with GitHub Actions. Auto-tests on every push, auto-builds Docker image on merge to main. Dependabot enabled. Branch protection enabled on main.
 - **Phase 7** — Added Kubernetes manifests. App runs with 2 replicas, self-healing and rolling deployments using kind.
 - **Phase 8** — Migrated from MySQL to PostgreSQL. Added Spring profiles for Docker and Kubernetes environments.
+- **Phase 9** — Added Redis caching using RedisTemplate. GET by ID served from cache after first request. Cache invalidated on update and delete.
+- **Phase 10** — Added React frontend with full CRUD UI. Axios for API calls, CORS configured for local development.
