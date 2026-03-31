@@ -24,9 +24,15 @@ public class GlobalExceptionHandler {
 
     // Handles "Product not found" errors from service layer
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(RuntimeException ex) {
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
+
+        if (ex.getMessage().contains("User not found") ||
+                ex.getMessage().contains("Username already exists")) {
+            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        }
+
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 }
