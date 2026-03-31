@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: inventory-backend
+    runtime: docker
+    dockerfilePath: ./backend/inventory-management/Dockerfile
+    dockerContext: ./backend/inventory-management
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inventory-db
+          property: connectionString
+      - key: JWT_SECRET
+        value: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - key: JWT_EXPIRATION
+        value: 86400000
+
+databases:
+  - name: inventory-db
+    plan: free
