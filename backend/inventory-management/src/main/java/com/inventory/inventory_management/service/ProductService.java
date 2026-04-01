@@ -4,17 +4,24 @@ import com.inventory.inventory_management.dto.ProductRequestDTO;
 import com.inventory.inventory_management.dto.ProductResponseDTO;
 import com.inventory.inventory_management.model.Product;
 import com.inventory.inventory_management.repository.ProductRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final RedisTemplate<String, ProductResponseDTO> redisTemplate;
 
-    public ProductService(ProductRepository productRepository) {
+    private static final String CACHE_PREFIX = "product::";
+
+    public ProductService(ProductRepository productRepository,
+                          RedisTemplate<String, ProductResponseDTO> redisTemplate) {
         this.productRepository = productRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     // ---- Conversion Helpers ----
@@ -51,25 +58,49 @@ public class ProductService {
     }
 
     public ProductResponseDTO getProductById(Long id) {
+        String key = CACHE_PREFIX + id;
+
+        // Check Redis first
+        ProductResponseDTO cached = redisTemplate.opsForValue().get(key);
+        if (cached != null) {
+            System.out.println(">>> Cache HIT for id: " + id);
+            return cached;
+        }
+
+        // Cache miss — fetch from DB
+        System.out.println(">>> Fetching from DATABASE for id: " + id);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        return toResponseDTO(product);
+
+        ProductResponseDTO dto = toResponseDTO(product);
+
+        // Store in Redis for 10 minutes
+        redisTemplate.opsForValue().set(key, dto, Duration.ofMinutes(10));
+
+        return dto;
     }
 
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-
         product.setName(dto.getName());
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
 
-        return toResponseDTO(productRepository.save(product));
+        ProductResponseDTO updated = toResponseDTO(productRepository.save(product));
+
+        // Update cache
+        redisTemplate.opsForValue().set(CACHE_PREFIX + id, updated, Duration.ofMinutes(10));
+
+        return updated;
     }
 
     public void deleteProduct(Long id) {
         productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
         productRepository.deleteById(id);
+
+        // Remove from cache
+        redisTemplate.delete(CACHE_PREFIX + id);
     }
 }
