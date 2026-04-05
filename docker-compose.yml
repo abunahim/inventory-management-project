@@ -25,9 +25,9 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data        # ← add this
+      - redis-data:/data
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -51,6 +51,33 @@ services:
       redis:
         condition: service_healthy
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: inventory-prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: inventory-grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+
 volumes:
   postgres-data:
   redis-data:
+  grafana-data:

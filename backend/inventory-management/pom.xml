@@ -131,6 +131,18 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Actuator — exposes metrics endpoints -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<!-- Micrometer Prometheus — formats metrics for Prometheus -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
